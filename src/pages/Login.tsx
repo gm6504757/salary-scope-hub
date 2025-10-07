@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Building2, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 
 const companies = [
-  { value: "rms", label: "RMS (Radiant Manpower Services)" },
-  { value: "ims", label: "IMS (InLine Manpower Services Pvt Ltd)" },
-  { value: "kvs", label: "KVS Manpower Solutions" },
+  { id: "rms", name: "RMS Solutions", description: "Resource Management Systems" },
+  { id: "ims", name: "IMS Technologies", description: "Information Management Systems" },
+  { id: "kvs", name: "KVS Enterprises", description: "Knowledge Value Systems" },
 ];
 
 const clients = {
   rms: [
-    { value: "brand-studio", label: "Brand Studio Lifestyle Pvt Ltd" },
-    { value: "incap", label: "Incap Contract Manufacturing Pvt Ltd" },
+    { id: "brand-studio", name: "Brand Studio Lifestyle", description: "Lifestyle & Retail Management" },
+    { id: "incap", name: "Incap Contract Manufacturing", description: "Manufacturing Solutions" },
   ],
   ims: [
-    { value: "online-instruments", label: "Online Instruments India Pvt Ltd" },
-    { value: "mahabel", label: "Mahabel Industries" },
+    { id: "online-instruments", name: "Online Instruments India", description: "Industrial Instrumentation" },
+    { id: "mahabel", name: "Mahabel Industries", description: "Industrial Solutions" },
   ],
   kvs: [
-    { value: "tvs", label: "TVS Electronics Ltd" },
-    { value: "spectrus", label: "Spectrus Sustainable Pvt Ltd" },
+    { id: "tvs", name: "TVS Electronics", description: "Electronics & Technology" },
+    { id: "spectrus", name: "Spectrus Sustainable", description: "Sustainable Solutions" },
   ],
 };
 
@@ -33,148 +34,143 @@ const Login = () => {
   const [step, setStep] = useState(1);
   const [selectedCompany, setSelectedCompany] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleCompanyNext = () => {
-    if (selectedCompany) setStep(2);
-  };
-
-  const handleClientNext = () => {
-    if (selectedClient) setStep(3);
-  };
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Store selections in localStorage for demo
-    localStorage.setItem("company", selectedCompany);
-    localStorage.setItem("client", selectedClient);
-    navigate("/dashboard");
+  const handleNext = () => {
+    if (step === 1 && !selectedCompany) {
+      toast.error("Please select a company");
+      return;
+    }
+    if (step === 2 && !selectedClient) {
+      toast.error("Please select a client profile");
+      return;
+    }
+    if (step === 3) {
+      if (!username || !password) {
+        toast.error("Please enter username and password");
+        return;
+      }
+      localStorage.setItem("company", selectedCompany);
+      localStorage.setItem("client", selectedClient);
+      toast.success("Login successful!");
+      navigate("/dashboard");
+      return;
+    }
+    setStep(step + 1);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary to-accent p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="space-y-3 text-center pb-8">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-2">
-            <Users className="w-8 h-8 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#2B5876] to-[#4E94C1]">
+      <div className="w-full max-w-2xl text-center space-y-8">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="inline-block bg-white/10 backdrop-blur-sm px-6 py-2 rounded-full">
+            <h1 className="text-white font-semibold text-lg tracking-wide">PMS</h1>
           </div>
-          <CardTitle className="text-3xl font-bold">Salary Management System</CardTitle>
-          <CardDescription className="text-base">
-            {step === 1 && "Select your company to continue"}
-            {step === 2 && "Select client profile"}
-            {step === 3 && "Enter your credentials"}
-          </CardDescription>
-        </CardHeader>
+          <h2 className="text-4xl font-bold text-white">Payroll Management</h2>
+          <p className="text-white/80 text-lg">Professional Salary & Payroll System</p>
+        </div>
 
-        <CardContent className="space-y-6">
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="company" className="text-base font-medium flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  Main Company
-                </Label>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger id="company" className="h-12">
-                    <SelectValue placeholder="Select your company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.value} value={company.value} className="cursor-pointer">
-                        {company.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center gap-4">
+          {[1, 2, 3].map((num, idx) => (
+            <div key={num} className="flex items-center">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
+                  num === step
+                    ? "bg-white text-[#2B5876]"
+                    : num < step
+                    ? "bg-white/80 text-[#2B5876]"
+                    : "bg-white/20 text-white"
+                }`}
+              >
+                {num}
               </div>
-              <Button onClick={handleCompanyNext} disabled={!selectedCompany} className="w-full h-12 text-base" size="lg">
-                Continue
-              </Button>
+              {idx < 2 && <div className="w-12 h-0.5 bg-white/30 mx-2" />}
             </div>
-          )}
+          ))}
+        </div>
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="client" className="text-base font-medium flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Client Profile
-                </Label>
-                <Select value={selectedClient} onValueChange={setSelectedClient}>
-                  <SelectTrigger id="client" className="h-12">
-                    <SelectValue placeholder="Select client profile" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients[selectedCompany as keyof typeof clients]?.map((client) => (
-                      <SelectItem key={client.value} value={client.value} className="cursor-pointer">
-                        {client.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex gap-3">
-                <Button onClick={() => setStep(1)} variant="outline" className="flex-1 h-12">
-                  Back
-                </Button>
-                <Button onClick={handleClientNext} disabled={!selectedClient} className="flex-1 h-12">
-                  Continue
-                </Button>
-              </div>
+        {/* Main Card */}
+        <Card className="w-full shadow-2xl">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2 text-xl font-semibold">
+              <Building2 className="w-5 h-5" />
+              {step === 1 && "Select Company"}
+              {step === 2 && "Select Client Profile"}
+              {step === 3 && "Login Credentials"}
             </div>
-          )}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {step === 1 && (
+              <RadioGroup value={selectedCompany} onValueChange={setSelectedCompany} className="space-y-3">
+                {companies.map((company) => (
+                  <Label
+                    key={company.id}
+                    htmlFor={company.id}
+                    className="flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                  >
+                    <RadioGroupItem value={company.id} id={company.id} />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold">{company.name}</div>
+                      <div className="text-sm text-muted-foreground">{company.description}</div>
+                    </div>
+                  </Label>
+                ))}
+              </RadioGroup>
+            )}
 
-          {step === 3 && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-base font-medium">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  value={credentials.username}
-                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                  required
-                  className="h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-base font-medium">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={credentials.password}
-                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                  required
-                  className="h-12"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button type="button" onClick={() => setStep(2)} variant="outline" className="flex-1 h-12">
-                  Back
-                </Button>
-                <Button type="submit" className="flex-1 h-12">
-                  Login
-                </Button>
-              </div>
-            </form>
-          )}
+            {step === 2 && (
+              <RadioGroup value={selectedClient} onValueChange={setSelectedClient} className="space-y-3">
+                {clients[selectedCompany as keyof typeof clients]?.map((client) => (
+                  <Label
+                    key={client.id}
+                    htmlFor={client.id}
+                    className="flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-accent/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                  >
+                    <RadioGroupItem value={client.id} id={client.id} />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold">{client.name}</div>
+                      <div className="text-sm text-muted-foreground">{client.description}</div>
+                    </div>
+                  </Label>
+                ))}
+              </RadioGroup>
+            )}
 
-          {step < 3 && (
-            <div className="flex justify-center gap-2 pt-4">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={`h-2 w-2 rounded-full transition-all ${
-                    s === step ? "bg-primary w-8" : "bg-muted"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {step === 3 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            <Button onClick={handleNext} className="w-full" size="lg">
+              {step === 3 ? "Login" : "Next"}
+              {step !== 3 && <ChevronRight className="ml-2 w-4 h-4" />}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
